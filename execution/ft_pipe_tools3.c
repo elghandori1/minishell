@@ -19,27 +19,52 @@ void	handle_pipe_error(void)
 	exit(1);
 }
 
+void	handle_builtin_with_files(t_cmd *cmd, int *tmpout, int *tmpint)
+{
+	int	fdd;
+
+	fdd = 0;
+	if (stdin_stdout(cmd, tmpout, tmpint))
+	{
+		fdd = start_std(cmd);
+		if (fdd == -1)
+			printf("%s: No such file or directory\n", cmd->files->file);
+		else
+			run_builtin(cmd);
+	}
+	if (cmd->files != NULL)
+		restore_fd(*tmpout, *tmpint);
+}
+
+void	handle_builtin_pipe(t_cmd *cmd, int *input_fd, int fd[2])
+{
+	int	tmpout;
+	int	tmpint;
+
+	tmpout = dup(STDOUT_FILENO);
+	tmpint = dup(STDIN_FILENO);
+	if (*input_fd != STDIN_FILENO)
+		dup2(*input_fd, STDIN_FILENO);
+	dup2(fd[1], STDOUT_FILENO);
+	run_builtin(cmd);
+	restore_fd(tmpout, tmpint);
+}
+
 void	process_command(t_cmd *cmd, int *input_fd, int fd[2])
 {
-	int (tmpout), (tmpint), (fdd);
+	int	tmpout;
+	int	tmpint;
+
 	tmpout = 0;
 	tmpint = 0;
-	fdd = 0;
-	if (is_builtin(cmd->cmd) && (check_stdout(cmd->files) \
-			|| check_stdin(cmd->files)))
+	if (is_builtin(cmd->cmd))
 	{
-		if (stdin_stdout(cmd, &tmpout, &tmpint))
-		{
-			fdd = start_std(cmd);
-			if (fdd == -1)
-				printf("%s: No such file or directory\n", cmd->files->file);
-			else
-				run_builtin(cmd);
-		}
-		if (cmd->files != NULL)
-			restore_fd(tmpout, tmpint);
+		if (check_stdout(cmd->files) || check_stdin(cmd->files))
+			handle_builtin_with_files(cmd, &tmpout, &tmpint);
+		else
+			handle_builtin_pipe(cmd, input_fd, fd);
 	}
-	if (!is_builtin(cmd->cmd))
+	else
 		run_pipeline(cmd, *input_fd, fd[1], fd);
 	close(fd[1]);
 	if (*input_fd != STDIN_FILENO)

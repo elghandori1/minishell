@@ -85,7 +85,7 @@ void	wait_for_children(void)
 		else if (WIFSIGNALED(status))
 		{
 			if (WTERMSIG(status) == SIGQUIT)
-				fprintf(stderr, "Quit: 3\n");
+				write(STDERR_FILENO, "Quit: 3\n", 9);
 			g_lobal_env->status = 128 + WTERMSIG(status);
 		}
 	}
