@@ -36,7 +36,7 @@ Open your terminal and type:
 
 ```bash
 # Copy the project from GitHub
-git clone https://github.com/yourusername/minishell.git
+git clone https://github.com/elghandori1/minishell.git
 
 # Go into the project folder
 cd minishell
