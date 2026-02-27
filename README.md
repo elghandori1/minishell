@@ -1,6 +1,6 @@
 # 🐚 MiniShell - A Simple Shell Like Bash
 
-![MiniShell Demo](./image/mainImage.png)
+![MiniShell Demo](image/mainImage.png)
 
 ## What is MiniShell?
 
